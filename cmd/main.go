@@ -29,15 +29,32 @@ import (
 // }
 
 type DbView struct {
-	dds core.DbDataService
+	dds       core.DbDataService
+	currentDb string
 }
 
-func (dv *DbView) DbSidePanelContainer() fyne.CanvasObject {
+func (dv *DbView) schemaAccordion() fyne.CanvasObject {
 	schemaObjects, err := dv.dds.GetSchemaElements(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 	return sidePanel.SchemaAccordion(schemaObjects)
+}
+
+func (dv *DbView) dbSelector() fyne.CanvasObject {
+	dbNames, err := dv.dds.GetAllDbNames(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return sidePanel.DatabaseSelector(dv.currentDb, dbNames)
+}
+
+func (dv *DbView) SidePanel() fyne.CanvasObject {
+	schemaAccordion := dv.schemaAccordion()
+	dbSelector := dv.dbSelector()
+
+	return container.New(&sidePanel.SidePanelLayout{}, dbSelector, schemaAccordion)
 }
 
 func DbContainer() *container.Split {
@@ -54,10 +71,11 @@ func DbContainer() *container.Split {
 	}
 
 	dbv := DbView{
-		dds: dbDataService,
+		dds:       dbDataService,
+		currentDb: "postgres",
 	}
 
-	rd := dbv.DbSidePanelContainer()
+	rd := dbv.SidePanel()
 
 	splitc := container.NewHSplit(rd, canvas.NewText("lol", color.White))
 	splitc.SetOffset(0.27)

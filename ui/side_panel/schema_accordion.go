@@ -59,5 +59,7 @@ func SchemaAccordion(schemaObjects []*core.SchemaData) fyne.CanvasObject {
 	// creating an accordion composed of accordions
 	schemaAcc := widget.NewAccordion(schemaItems...)
 
-	return container.NewVScroll(schemaAcc)
+	scrollAcc := container.NewVScroll(schemaAcc)
+
+	return scrollAcc
 }

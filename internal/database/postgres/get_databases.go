@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-func (pr *postgresRepo) GetAllDatabases(ctx context.Context) ([]string, error) {
+func (pr *postgresRepo) GetAllDbNames(ctx context.Context) ([]string, error) {
 	query := `SELECT datname FROM pg_catalog.pg_database WHERE datistemplate=$1`
 
 	rows, err := pr.db.QueryContext(ctx, query, false)
