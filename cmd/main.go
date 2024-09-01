@@ -9,10 +9,9 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
 	"github.com/ThunderGod77/dbam/internal/core"
 	"github.com/ThunderGod77/dbam/internal/database/postgres"
+	sidePanel "github.com/ThunderGod77/dbam/ui/side_panel"
 	"github.com/ThunderGod77/dbam/utils"
 	//"fyne.io/fyne/v2/layout"
 )
@@ -38,47 +37,7 @@ func (dv *DbView) DbSidePanelContainer() fyne.CanvasObject {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	schemaItems := []*widget.AccordionItem{}
-	schemaObjects[0], schemaObjects[2] = schemaObjects[2], schemaObjects[0]
-
-	type colDetails struct {
-		colName string
-		colType string
-	}
-
-	for _, schema := range schemaObjects {
-		tableAccordionItems := []*widget.AccordionItem{}
-		for _, table := range schema.Tables {
-			colArr := []fyne.CanvasObject{}
-			for _, col := range table.Columns {
-				colArr = append(
-					colArr,
-					container.New(layout.NewCustomPaddedLayout(0, 0, 40, 0),
-						container.NewHBox(
-							widget.NewLabel(col.ColumnName), layout.NewSpacer(), widget.NewLabel(col.ColumnType),
-						),
-					),
-				)
-			}
-
-			colList := container.NewVBox(container.NewGridWithColumns(1, colArr...))
-
-			tableAccordionItems = append(tableAccordionItems, widget.NewAccordionItem(table.TableName, colList))
-
-		}
-
-		tableAccordion := widget.NewAccordion(tableAccordionItems...)
-		schemaItem := widget.NewAccordionItem(schema.SchemaName,
-			container.New(layout.NewCustomPaddedLayout(0, 0, 20, 0), tableAccordion))
-
-		schemaItems = append(schemaItems, schemaItem)
-
-	}
-
-	schemaAcc := widget.NewAccordion(schemaItems...)
-
-	return container.NewVScroll(schemaAcc)
+	return sidePanel.SchemaAccordion(schemaObjects)
 }
 
 func DbContainer() *container.Split {
