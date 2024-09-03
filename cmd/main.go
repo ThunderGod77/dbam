@@ -54,24 +54,30 @@ func (dv *DbView) dbSelector() fyne.CanvasObject {
 }
 
 func (dv *DbView) SidePanel() fyne.CanvasObject {
-	schemaAccordion := dv.schemaAccordion()
 	dbSelector := dv.dbSelector()
 
-	sidePanelContainer := container.New(&sidePanel.SidePanelLayout{}, dbSelector, schemaAccordion)
+	schemaAccordion := dv.schemaAccordion()
 
-	return sidePanelContainer
+	dv.sidePanel = container.New(&sidePanel.SidePanelLayout{}, dbSelector, schemaAccordion)
+
+	return dv.sidePanel
 }
 
 func (dv *DbView) RefreshSidePanel(newDbName string) {
+	if dv.sidePanel == nil {
+		return
+	}
+
 	dv.currentDb = newDbName
+	dv.dds.ChangeDb(dv.currentDb)
+
 	schemaAccordion := dv.schemaAccordion()
 
 	children := dv.sidePanel.Objects
-	if len(children) < 2 {
-		log.Fatal("should not have less than 2 childeren")
+	if len(children) > 1 {
+		dv.sidePanel.Remove(children[1])
 	}
 
-	dv.sidePanel.Remove(children[1])
 	dv.sidePanel.Add(schemaAccordion)
 }
 

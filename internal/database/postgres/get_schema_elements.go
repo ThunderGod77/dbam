@@ -113,6 +113,9 @@ func (pr *postgresRepo) querySchemaElements(ctx context.Context) ([]*schemaEleme
                    character_maximum_length, numeric_precision, numeric_scale, datetime_precision 
                    FROM information_schema.columns ORDER BY table_schema, table_name`
 
+	pr.RLock()
+	defer pr.RUnlock()
+
 	rows, err := pr.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

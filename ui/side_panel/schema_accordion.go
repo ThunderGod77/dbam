@@ -10,7 +10,6 @@ import (
 
 func SchemaAccordion(schemaObjects []*core.SchemaData) fyne.CanvasObject {
 	schemaItems := []*widget.AccordionItem{}
-	schemaObjects[0], schemaObjects[2] = schemaObjects[2], schemaObjects[0]
 
 	type colDetails struct {
 		colName string

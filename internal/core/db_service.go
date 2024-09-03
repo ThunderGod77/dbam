@@ -18,6 +18,9 @@ type SchemaData struct {
 }
 
 type DbDataService interface {
+	ChangeDb(dbName string) error
+
 	GetSchemaElements(ctx context.Context) ([]*SchemaData, error)
+
 	GetAllDbNames(ctx context.Context) ([]string, error)
 }

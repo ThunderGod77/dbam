@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"sync"
 
 	"github.com/ThunderGod77/dbam/internal/core"
 
@@ -10,6 +11,9 @@ import (
 )
 
 type postgresRepo struct {
+	sync.RWMutex
+
+	core.ConnObject
 	db *sql.DB
 }
 
@@ -25,6 +29,8 @@ func NewPostgresService(conn core.ConnObject) (core.DbDataService, error) {
 	}
 
 	return &postgresRepo{
-		db: db,
+		RWMutex:    sync.RWMutex{},
+		ConnObject: conn,
+		db:         db,
 	}, nil
 }
