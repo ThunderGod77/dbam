@@ -4,6 +4,7 @@ import (
 	"context"
 	"image/color"
 	"log"
+	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -29,6 +30,8 @@ import (
 // }
 
 type DbView struct {
+	sync.Mutex
+	sidePanel *fyne.Container
 	dds       core.DbDataService
 	currentDb string
 }
@@ -47,14 +50,29 @@ func (dv *DbView) dbSelector() fyne.CanvasObject {
 		log.Fatal(err)
 	}
 
-	return sidePanel.DatabaseSelector(dv.currentDb, dbNames)
+	return sidePanel.DatabaseSelector(dv.currentDb, dbNames, dv.RefreshSidePanel)
 }
 
 func (dv *DbView) SidePanel() fyne.CanvasObject {
 	schemaAccordion := dv.schemaAccordion()
 	dbSelector := dv.dbSelector()
 
-	return container.New(&sidePanel.SidePanelLayout{}, dbSelector, schemaAccordion)
+	sidePanelContainer := container.New(&sidePanel.SidePanelLayout{}, dbSelector, schemaAccordion)
+
+	return sidePanelContainer
+}
+
+func (dv *DbView) RefreshSidePanel(newDbName string) {
+	dv.currentDb = newDbName
+	schemaAccordion := dv.schemaAccordion()
+
+	children := dv.sidePanel.Objects
+	if len(children) < 2 {
+		log.Fatal("should not have less than 2 childeren")
+	}
+
+	dv.sidePanel.Remove(children[1])
+	dv.sidePanel.Add(schemaAccordion)
 }
 
 func DbContainer() *container.Split {
