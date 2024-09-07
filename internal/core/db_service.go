@@ -23,4 +23,6 @@ type DbDataService interface {
 	GetSchemaElements(ctx context.Context) ([]*SchemaData, error)
 
 	GetAllDbNames(ctx context.Context) ([]string, error)
+
+	RunQuery(ctx context.Context, query string) ([][]string, error)
 }

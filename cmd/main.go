@@ -2,38 +2,31 @@ package main
 
 import (
 	"context"
-	"image/color"
 	"log"
 	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/widget"
 	"github.com/ThunderGod77/dbam/internal/core"
 	"github.com/ThunderGod77/dbam/internal/database/postgres"
+	"github.com/ThunderGod77/dbam/ui/editor"
 	sidePanel "github.com/ThunderGod77/dbam/ui/side_panel"
 	"github.com/ThunderGod77/dbam/utils"
-	//"fyne.io/fyne/v2/layout"
 )
-
-// func TableInfoContainer() *fyne.Container {
-//
-//
-//
-//   items := []*widget.AccordionItem{}
-//
-//   widget.NewAccordionItem(title string, detail fyne.CanvasObject)
-// 	//  widget.NewAccordion(items ...*widget.AccordionItem)
-// 	tiContainer := container.NewWithoutLayout(widget.NewLabel("left part"))
-// 	return tiContainer
-// }
 
 type DbView struct {
 	sync.Mutex
 	sidePanel *fyne.Container
 	dds       core.DbDataService
 	currentDb string
+	query     binding.String
+}
+
+func (dv *DbView) sqlEditor() fyne.CanvasObject {
+	return editor.SqlEditor(dv.query)
 }
 
 func (dv *DbView) schemaAccordion() fyne.CanvasObject {
@@ -54,6 +47,16 @@ func (dv *DbView) dbSelector() fyne.CanvasObject {
 }
 
 func (dv *DbView) SidePanel() fyne.CanvasObject {
+	dbSelector := dv.dbSelector()
+
+	schemaAccordion := dv.schemaAccordion()
+
+	dv.sidePanel = container.New(&sidePanel.SidePanelLayout{}, dbSelector, schemaAccordion)
+
+	return dv.sidePanel
+}
+
+func (dv *DbView) EditorAndResult() fyne.CanvasObject {
 	dbSelector := dv.dbSelector()
 
 	schemaAccordion := dv.schemaAccordion()
@@ -97,11 +100,20 @@ func DbContainer() *container.Split {
 	dbv := DbView{
 		dds:       dbDataService,
 		currentDb: "postgres",
+		query:     binding.NewString(),
 	}
 
 	rd := dbv.SidePanel()
 
-	splitc := container.NewHSplit(rd, canvas.NewText("lol", color.White))
+	splitc := container.NewHSplit(
+		rd,
+		container.NewVSplit(
+			editor.Editor(dbv.query,
+				func() {
+					log.Println(dbv.query.Get())
+				}),
+			widget.NewLabel("lol"),
+		))
 	splitc.SetOffset(0.27)
 
 	return splitc
