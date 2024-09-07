@@ -32,7 +32,8 @@ func (sp *EditorLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	top.Resize(fyne.NewSize(size.Width, size.Height))
 	top.Move(fyne.NewPos(0, 0))
 
-	// Set the bottom object to occupy the remaining space
 	overlay.Resize(overlay.MinSize())
-	overlay.Move(fyne.NewPos(top.Size().Width-overlay.Size().Width, top.Size().Height-overlay.Size().Height))
+
+	// Set the bottom object to occupy the remaining space
+	overlay.Move(fyne.NewPos(top.Size().Width-overlay.Size().Width-3, top.Size().Height-overlay.Size().Height-2))
 }
