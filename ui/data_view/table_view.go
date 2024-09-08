@@ -1,6 +1,8 @@
 package dataView
 
 import (
+	"log"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
@@ -19,7 +21,7 @@ func DataView(data [][]string, message string) fyne.CanvasObject {
 		func() fyne.CanvasObject {
 			lbl := widget.NewLabel("")
 			scrollLabel := container.NewScroll(lbl)
-			scrollLabel.SetMinSize(fyne.NewSize(100, 50))
+			scrollLabel.SetMinSize(fyne.NewSize(50, 40))
 			return scrollLabel
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
@@ -33,12 +35,13 @@ func DataView(data [][]string, message string) fyne.CanvasObject {
 	for _, row := range data {
 		for j, val := range row {
 			lableSize := fyne.MeasureText(val, theme.TextSize(), fyne.TextStyle{})
-			cellSize := min(300, lableSize.Width)
+			cellSize := min(300, lableSize.Width+40)
 			colWidths[j] = max(colWidths[j], cellSize)
 		}
 	}
 
 	for i, val := range colWidths {
+		log.Println(i, val)
 		list.SetColumnWidth(i, val)
 	}
 	return list
