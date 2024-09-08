@@ -74,12 +74,14 @@ func (dv *DbView) RunQuery() {
 	}
 
 	dv.mainScreen.Trailing = dataView.DataView(result, "")
+	dv.mainScreen.Refresh()
 }
 
 func (dv *DbView) MainScreen() fyne.CanvasObject {
 	mainScreen := container.NewVSplit(
 		editor.Editor(dv.query,
 			func() {
+				log.Println("lol")
 				dv.RunQuery()
 			}),
 		dataView.DataView([][]string{}, "Please run a query to see the result"),

@@ -13,16 +13,21 @@ func (pr *postgresRepo) RunQuery(ctx context.Context, query string) ([][]string,
 
 	defer rows.Close()
 
-	result := [][]string{}
+	result := make([][]string, 0)
 
 	columns, err := rows.Columns()
 	if err != nil {
 		return nil, err
 	}
+
 	result = append(result, columns)
 
 	values := make([]sql.RawBytes, len(columns))
 	scanArgs := make([]interface{}, len(values))
+
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
 
 	for rows.Next() {
 		err = rows.Scan(scanArgs...)
