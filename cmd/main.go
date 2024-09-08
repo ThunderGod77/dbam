@@ -9,9 +9,9 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/widget"
 	"github.com/ThunderGod77/dbam/internal/core"
 	"github.com/ThunderGod77/dbam/internal/database/postgres"
+	dataView "github.com/ThunderGod77/dbam/ui/data_view"
 	"github.com/ThunderGod77/dbam/ui/editor"
 	sidePanel "github.com/ThunderGod77/dbam/ui/side_panel"
 	"github.com/ThunderGod77/dbam/utils"
@@ -19,10 +19,12 @@ import (
 
 type DbView struct {
 	sync.Mutex
-	sidePanel *fyne.Container
-	dds       core.DbDataService
-	currentDb string
-	query     binding.String
+	sidePanel  *fyne.Container
+	mainScreen *container.Split
+	dds        core.DbDataService
+	currentDb  string
+	query      binding.String
+	resultData [][]string
 }
 
 func (dv *DbView) sqlEditor() fyne.CanvasObject {
@@ -56,14 +58,36 @@ func (dv *DbView) SidePanel() fyne.CanvasObject {
 	return dv.sidePanel
 }
 
-func (dv *DbView) EditorAndResult() fyne.CanvasObject {
-	dbSelector := dv.dbSelector()
+func (dv *DbView) RunQuery() {
+	queryString, err := dv.query.Get()
+	if err != nil {
 
-	schemaAccordion := dv.schemaAccordion()
+		dv.mainScreen.Trailing = dataView.DataView([][]string{}, err.Error())
+		return
+	}
 
-	dv.sidePanel = container.New(&sidePanel.SidePanelLayout{}, dbSelector, schemaAccordion)
+	result, err := dv.dds.RunQuery(context.Background(), queryString)
+	if err != nil {
 
-	return dv.sidePanel
+		dv.mainScreen.Trailing = dataView.DataView([][]string{}, err.Error())
+		return
+	}
+
+	dv.mainScreen.Trailing = dataView.DataView(result, "")
+}
+
+func (dv *DbView) MainScreen() fyne.CanvasObject {
+	mainScreen := container.NewVSplit(
+		editor.Editor(dv.query,
+			func() {
+				dv.RunQuery()
+			}),
+		dataView.DataView([][]string{}, "Please run a query to see the result"),
+	)
+
+	dv.mainScreen = mainScreen
+
+	return dv.mainScreen
 }
 
 func (dv *DbView) RefreshSidePanel(newDbName string) {
@@ -104,16 +128,12 @@ func DbContainer() *container.Split {
 	}
 
 	rd := dbv.SidePanel()
+	ms := dbv.MainScreen()
 
 	splitc := container.NewHSplit(
 		rd,
-		container.NewVSplit(
-			editor.Editor(dbv.query,
-				func() {
-					log.Println(dbv.query.Get())
-				}),
-			widget.NewLabel("lol"),
-		))
+		ms,
+	)
 	splitc.SetOffset(0.27)
 
 	return splitc

@@ -5,9 +5,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func DataView(data [][]string) fyne.CanvasObject {
+func DataView(data [][]string, message string) fyne.CanvasObject {
 	if len(data) == 0 {
-		return widget.NewLabel("No data to display")
+		return widget.NewLabel(message)
 	}
 	list := widget.NewTable(
 		func() (int, int) {
