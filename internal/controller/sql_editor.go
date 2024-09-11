@@ -2,11 +2,13 @@ package controller
 
 import (
 	"context"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
+	"github.com/ThunderGod77/dbam/internal/core"
 	customWidget "github.com/ThunderGod77/dbam/internal/ui/custom_widget"
 	"github.com/ThunderGod77/dbam/internal/ui/layouts"
 )
@@ -36,11 +38,10 @@ func newSqlEditor(sql binding.String, runQuery func()) fyne.CanvasObject {
 const PLACEHOLDER_RESULT = "Please run a query to see the result"
 
 type SqlScreen struct {
-	query     binding.String
-	Object    fyne.CanvasObject
-	runQuery  func(ctx context.Context, query string) ([][]string, error)
-	tableView fyne.CanvasObject
-	index     int
+	query  binding.String
+	Object *container.Split
+	dds    core.DbDataService
+	index  int
 }
 
 func (ss *SqlScreen) QueryResult() {
@@ -48,34 +49,35 @@ func (ss *SqlScreen) QueryResult() {
 
 	queryString, err := ss.query.Get()
 	if err != nil {
-		ss.tableView = customWidget.TableView([][]string{}, err.Error())
+		ss.Object.Trailing = customWidget.TableView([][]string{}, err.Error())
 		return
 	}
 
-	result, err := ss.runQuery(context.Background(), queryString)
+	log.Println("Query: ", queryString)
+
+	result, err := ss.dds.RunQuery(context.Background(), queryString)
 	if err != nil {
-		ss.tableView = customWidget.TableView([][]string{}, err.Error())
+		ss.Object.Trailing = customWidget.TableView([][]string{}, err.Error())
 		return
 	}
 
-	ss.tableView = customWidget.TableView(result, "")
+	ss.Object.Trailing = customWidget.TableView(result, "")
 }
 
-func NewSqlScreen(index int, runQuery func(ctx context.Context, query string) ([][]string, error)) fyne.CanvasObject {
+func NewSqlScreen(index int, dds core.DbDataService) fyne.CanvasObject {
 	query := binding.NewString()
 
 	tableView := customWidget.TableView([][]string{}, PLACEHOLDER_RESULT)
 	ss := &SqlScreen{
-		query:     query,
-		Object:    nil,
-		runQuery:  runQuery,
-		tableView: tableView,
-		index:     index,
+		query:  query,
+		Object: nil,
+		dds:    dds,
+		index:  index,
 	}
 
 	sqlEditor := newSqlEditor(query, ss.QueryResult)
 
-	ss.Object = container.NewVSplit(sqlEditor, ss.tableView)
+	ss.Object = container.NewVSplit(sqlEditor, tableView)
 
 	return ss.Object
 }

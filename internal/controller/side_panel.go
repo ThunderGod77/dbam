@@ -53,13 +53,15 @@ func NewSidePanel(dds core.DbDataService, currentDb string) fyne.CanvasObject {
 		currentDb: currentDb,
 		sidePanel: nil,
 	}
+
+	dbSelector := widget.NewSelect(dbNames, sp.ChangeDb)
+	dbSelector.SetSelected(currentDb)
+
 	schemaObjects, err := sp.dds.GetSchemaElements(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 	schemaAccordion := customWidget.SchemaAccordion(schemaObjects)
-
-	dbSelector := widget.NewSelect(dbNames, sp.ChangeDb)
 
 	sp.sidePanel = container.New(&layouts.SidePanelLayout{}, dbSelector, schemaAccordion)
 

@@ -26,7 +26,7 @@ func DbContainer() *container.Split {
 	}
 
 	sp := controller.NewSidePanel(dbDataService, "postgres")
-	ms := controller.NewSqlScreen(1, dbDataService.RunQuery)
+	ms := controller.NewSqlScreen(1, dbDataService)
 
 	splitc := container.NewHSplit(
 		sp,
