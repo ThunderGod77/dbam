@@ -1,4 +1,4 @@
-package editor
+package customWidget
 
 import (
 	"fyne.io/fyne/v2"

@@ -1,4 +1,4 @@
-package editor
+package layouts
 
 import (
 	"fyne.io/fyne/v2"

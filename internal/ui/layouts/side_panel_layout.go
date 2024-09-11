@@ -1,4 +1,4 @@
-package sidePanel
+package layouts
 
 import "fyne.io/fyne/v2"
 

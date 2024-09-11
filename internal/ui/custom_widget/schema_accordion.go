@@ -1,4 +1,4 @@
-package sidePanel
+package customWidget
 
 import (
 	"fyne.io/fyne/v2"

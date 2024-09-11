@@ -1,15 +1,13 @@
-package dataView
+package customWidget
 
 import (
-	"log"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
-func DataView(data [][]string, message string) fyne.CanvasObject {
+func TableView(data [][]string, message string) fyne.CanvasObject {
 	if len(data) == 0 {
 		return widget.NewLabel(message)
 	}
@@ -41,7 +39,6 @@ func DataView(data [][]string, message string) fyne.CanvasObject {
 	}
 
 	for i, val := range colWidths {
-		log.Println(i, val)
 		list.SetColumnWidth(i, val)
 	}
 	return list

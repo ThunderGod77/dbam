@@ -6,6 +6,9 @@ import (
 )
 
 func (pr *postgresRepo) RunQuery(ctx context.Context, query string) ([][]string, error) {
+	pr.RLock()
+	defer pr.RUnlock()
+
 	rows, err := pr.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
